@@ -1,1 +1,3 @@
-console.log("Hello CodeSandbox");
+// run `node index.js` in the terminal
+
+console.log(`Hello Node.js v${process.versions.node}!`);
