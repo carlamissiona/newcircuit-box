@@ -9,6 +9,7 @@ const {
   postUsersubs,
   postMicro,
   postArticle,
+  getDrafts,
 } = require("../db");
 
 const root =
@@ -87,8 +88,6 @@ const rendrHome = async (req, res) => {
     subitems: artcls,
   });
 };
-
-
 
 const post_microblog = async (req, res) => {
   console.log("POSTING POSTING ");
@@ -319,26 +318,21 @@ const post_friends = async (req, res) => {
   res.render("search", { title: "Get Search", user: req.user });
 }; // end post subs
 
-
 const draft_process = async (req, res) => {
   
-  // console.log("POSTING POSTING ");
-  // console.log("POSTING POSTING ");
- 
-
   let user = null;
-  const chk_db_artcl = ;
-  const chk_db_procssr =; 
+  let chk_db_artcl = null ;
+  // const chk_db_procssr =;
 
-  
   try {
-    const postingblog = await postMicro({ message, user }).then((vl) => {
+    const postingblog = await getDrafts().then((vl) => {
       console.log("postingblog");
       console.log("<== blogging");
       res.redirect("/app?message=You have successfully posted a blog");
     });
 
     res.redirect("home");
+
   } catch (error) {
     console.log("Error!!", error);
     res.redirect("/app?error=Server error");

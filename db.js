@@ -276,6 +276,21 @@ const getSearchedchannels = async (data) => {
   }
 };
 
+const getDrafts = async () => {
+  
+  
+  const query = "SELECT * FROM nc_articles WHERE nc_draft ";
+  
+  try {
+    const result = await pool.query(query);
+
+    return result.rows; 
+  } catch (error) {
+    console.log("error get drafts");
+    console.log(error);
+  }
+
+};
 const getSearchedfriends = async (data) => {
   const { searched } = data;
   let search = `'%"Name"%:%${searched}%'`;
@@ -309,4 +324,5 @@ module.exports = {
   getSearchedchannels,
   getSearchedfriends,
   postArticle,
+  getDrafts,
 };
