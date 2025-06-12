@@ -115,7 +115,11 @@ const isAuthenticated = async (req, res, next) => {
     user = await getdb_email(decoded.id).then((value) => {
       req.user = value.nc_email;
       req.userinfo = value.nc_details_user;
+      req.userfullname = JSON.parse(value.nc_details_user).Name;
+      req.user_ischannel = value.nc_ischannel;
       user = value;
+      console.log("full====name================");
+      console.log(req.userfullname);
       if (!user || user == null) {
         console.log("@ then clause null");
 

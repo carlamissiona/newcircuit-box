@@ -46,6 +46,31 @@ const createUserDB = async (userData) => {
   }
 };
 
+const postArticle = async (postData) => {
+  const { content, userid, draft_status, details } = postData;
+  console.log("post micro user @@ postArticle");
+  console.log(content);
+  console.log(userid);
+  const query = `
+    INSERT INTO nc_articles(nc_subswriter, nc_content, nc_isdraft, nc_details_article,  nc_date_created) 
+    VALUES ($1, $2, $3, $4, NOW())
+    RETURNING *
+  `;
+
+  const values = [userid, content, draft_status, details];
+
+  try {
+    const result = await pool.query(query, values);
+    console.log(" DB results postArticle");
+    console.log(result);
+    return result.rows[0];
+  } catch (error) {
+    console.log("error postArticle");
+    console.log(error);
+    throw new Error(`Error creating microblog: ${error.message}`);
+  }
+};
+
 const postMicro = async (postData) => {
   const { message, user } = postData;
   console.log("post micro user");
@@ -283,4 +308,5 @@ module.exports = {
   getUserSubsByEmail,
   getSearchedchannels,
   getSearchedfriends,
+  postArticle,
 };

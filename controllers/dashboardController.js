@@ -8,6 +8,7 @@ const {
   getUserSubsByEmail,
   postUsersubs,
   postMicro,
+  postArticle,
 } = require("../db");
 
 const root =
@@ -59,16 +60,22 @@ const rendrHome = async (req, res) => {
   let subs = null;
   let artcls = [];
   let email = req.user;
-  console.log(email);
+  // console.log(email);
   let user = await getUserSubsByEmail(email).then((value) => {
-    console.log(value);
-    for (let i = 0; i < value.length; i++) {
-      let { title } = JSON.parse(value[i].nc_details_article);
-      artcls.push(JSON.parse(value[i].nc_details_article));
-    }
+    // TODO : details may be invalid JSON
 
-    console.log("How To Parse the Object article \n title:");
-    console.log(JSON.parse(value[0].nc_details_article).title);
+    console.log("====value===>>>>");
+    console.log(value.length);
+    if (value.length > 0) {
+      for (let i = 0; i < value.length; i++) {
+        let { title } = JSON.parse(value[i].nc_details_article);
+        artcls.push(JSON.parse(value[i].nc_details_article));
+      }
+
+      console.log(">>>>>>>>>>How To Parse the>>>>>>>>>>>>>>>>>>");
+      console.log(JSON.parse(value[0]));
+      subs = value;
+    }
     subs = value;
   });
 
@@ -81,9 +88,11 @@ const rendrHome = async (req, res) => {
   });
 };
 
+
+
 const post_microblog = async (req, res) => {
   console.log("POSTING POSTING ");
-  console.log("POSTING POSTING ");
+  // console.log("POSTING POSTING ");
   const { message } = req.body;
 
   if (!message) {
@@ -97,7 +106,7 @@ const post_microblog = async (req, res) => {
 
   try {
     const postingblog = await postMicro({ message, user }).then((vl) => {
-      console.log(postingblog);
+      console.log("postingblog");
       console.log("<== blogging");
       res.redirect("/app?message=You have successfully posted a blog");
     });
@@ -109,13 +118,58 @@ const post_microblog = async (req, res) => {
   }
 };
 
+// post submit publisher editor page post_publishercontent
+const post_publishercontent = async (req, res) => {
+  // TODO : CHECK IF THE REQUEST IS FROM CREATOR
+  let is_publisher;
+
+  const { content, title } = req.body;
+  console.log("channel ", req.user_ischannel);
+
+  console.log("fn!!!!!================!!!!!!!!!!");
+  console.log(req.userfullname);
+
+  console.log("req.userinfo");
+  console.log(req.userinfo);
+
+  let userid = null;
+  let categories = "[ Lifestyle, Street Children ]";
+  let draft_status = "Draft_Start";
+
+  console.log(req.userfullname);
+
+  let details = "author & category";
+  console.log("JSON.stringify(details)================================>>");
+  // console.log(JSON.stringify(details));
+
+  const userob = await getUserByEmailDB(req.user).then((vl) => {
+    console.log("email == @getUserByEmailDB ");
+    userid = vl.id;
+  });
+
+  try {
+    const posting = await postArticle({
+      content,
+      userid,
+      draft_status,
+      details,
+    }).then((vl) => {
+      console.log("postingblog");
+      console.log("<== blogging");
+      console.log(vl);
+      res.redirect("/editor?message=You have successfully posted a blog");
+    });
+  } catch (error) {
+    console.log("Error!!", error);
+    res.redirect("/editor?error=Server error");
+  }
+};
+
 // get publisher editor page
-const post_publisher = async (req, res) => {
+const render_editor = async (req, res) => {
   let subs = null;
   let artcls = [];
   let email = req.user;
-  console.log("req.userinfo");
-  console.log(req.userinfo);
   let is_publisher;
 
   res.render("publisher_editor", {
@@ -123,17 +177,16 @@ const post_publisher = async (req, res) => {
     user: req.user,
   });
 };
-// get publisher editor page
+
+//publisher home
 const render_publisher = async (req, res) => {
   let subs = null;
   let artcls = [];
   let email = req.user;
-  console.log("req.userinfo");
-  console.log(req.userinfo);
   let is_publisher;
 
-  res.render("publisher_editor", {
-    title: "Search Search",
+  res.render("publisher_home", {
+    title: "Creator's Home",
     user: req.user,
   });
 };
@@ -197,12 +250,6 @@ const post_search = async (req, res) => {
 
   //   results: result,
   // });
-};
-
-const get_publisher = async (req, res) => {
-  // publisher home
-
-  res.render("publisher_home", { title: "Publisher ", user: req.user });
 };
 
 const get_frsearch = async (req, res) => {
@@ -272,6 +319,32 @@ const post_friends = async (req, res) => {
   res.render("search", { title: "Get Search", user: req.user });
 }; // end post subs
 
+
+const draft_process = async (req, res) => {
+  
+  // console.log("POSTING POSTING ");
+  // console.log("POSTING POSTING ");
+ 
+
+  let user = null;
+  const chk_db_artcl = ;
+  const chk_db_procssr =; 
+
+  
+  try {
+    const postingblog = await postMicro({ message, user }).then((vl) => {
+      console.log("postingblog");
+      console.log("<== blogging");
+      res.redirect("/app?message=You have successfully posted a blog");
+    });
+
+    res.redirect("home");
+  } catch (error) {
+    console.log("Error!!", error);
+    res.redirect("/app?error=Server error");
+  }
+};
+
 module.exports = {
   showDashboard,
   rendrHome,
@@ -281,4 +354,8 @@ module.exports = {
   get_frsearch,
   post_friends,
   post_search,
+  render_publisher,
+  post_publishercontent,
+  render_editor,
+  draft_process,
 };
