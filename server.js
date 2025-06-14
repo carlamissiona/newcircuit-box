@@ -1,51 +1,44 @@
 const app = require("./app");
 
-const PORT = process.env.PORT || 3019;
-
+const PORT = process.env.PORT || 3021;
 
 async function fetch_a() {
   try {
-console.log("after 2 min hiiiiiiii");
-console.log("hiiiiiiii");
-console.log("hiiiiiiii");
+    console.log("after 2 min hiiiiiiii");
 
-    const response = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+    const response = await fetch("https://29csrv-3021.csb.app/drafts_db");
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
     console.log(data);
   } catch (error) {
-    console.error('Fetch error:', error.message);
+    console.error(error);
+    console.error("Fetch error:", error.message);
   }
 }
- 
-
 
 async function fetch_b() {
   try {
-console.log("after 2 min hiiiiiiii");
-console.log("hiiiiiiii");
-console.log("hiiiiiiii");
+    console.log("hi fetch b");
 
-    const response = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+    const response = await fetch(
+      "https://jsonplaceholder.typicode.com/posts/1"
+    );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
     console.log(data);
   } catch (error) {
-    console.error('Fetch error:', error.message);
+    console.error("Fetch error:", error.message);
   }
 }
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log("{{{{app}}}}");
-  console.log(app);
+  console.log("======app=====");
 
-setInterval(fetch_a, 120000); // Calls greet() every 1000 milliseconds (1 second)
-setInterval(fetch_b, 300000); // Calls greet() every 1000 milliseconds (1 second)
- 
+  setInterval(fetch_a, 120000); // Calls greet() every 1000 milliseconds (1 second)
+  setInterval(fetch_b, 200000); // Calls greet() every 1000 milliseconds (1 second)
 });
-

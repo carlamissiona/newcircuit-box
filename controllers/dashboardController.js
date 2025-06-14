@@ -65,16 +65,22 @@ const rendrHome = async (req, res) => {
   let user = await getUserSubsByEmail(email).then((value) => {
     // TODO : details may be invalid JSON
 
-    console.log("====value===>>>>");
+    console.log("=value>>>>>>>>>>");
     console.log(value.length);
     if (value.length > 0) {
       for (let i = 0; i < value.length; i++) {
         let { title } = JSON.parse(value[i].nc_details_article);
-        artcls.push(JSON.parse(value[i].nc_details_article));
+        artcls.push(JSON.stringify(value[i].nc_details_article));
+
+        console.log("ti===", title);
       }
 
-      console.log(">>>>>>>>>>How To Parse the>>>>>>>>>>>>>>>>>>");
+      console.log(">>>>>> How >>");
+      console.log(typeof value);
+      console.log(value[0]);
       console.log(JSON.parse(value[0]));
+      console.log("value");
+      console.log(value);
       subs = value;
     }
     subs = value;
@@ -195,8 +201,10 @@ const get_search_page = async (req, res) => {};
 
 const get_search = async (req, res) => {
   // get micro blog and render profile
-
-  let data = req.headers.xdata || "default";
+  console.log("req.cookies................................");
+  console.log(req.cookies);
+  let data = "";
+  
   if (typeof req.cookies.xdata1 === "undefined") {
     console.log("no cookie!");
     data = [];
@@ -275,7 +283,18 @@ const post_subs = async (req, res) => {
     const usersub = await postUsersubs({ email, val }).then((vl) => {
       console.log("email == @postUsersubs ");
       console.log(vl);
-
+      // b4 redirect user searched in cookie chehcked (xdata)
+      let data = req.headers.xdata || "default";
+      console.log("data: \n ", data);
+      if (typeof req.cookies.xdata1 === "undefined") {
+        console.log("no cookie!");
+        data = [];
+      } else {
+        console.log("req.cookies");
+        data = req.cookies.xdata1 || "default";
+        data = JSON.parse(data);
+        console.log(data);
+      }
       res.redirect("/search?messsage=Successfully subscribe!");
     });
   } catch (error) {
@@ -300,10 +319,12 @@ const post_friends = async (req, res) => {
 
     try {
       const userfr = await postUserfriends({ fremail, val }).then((vl) => {
-        console.log("email == @postUsersubs value is undefined ");
+        console.log(
+          "email == @postUsersubs value should be undefined to redirect with success"
+        );
         console.log(vl);
 
-        res.redirect("/search?messsage=Successfully subscribed!");
+        res.redirect("/friends?messsage=Successfully subscribed!");
       });
     } catch (error) {
       console.log("Error!! usersub", error);
@@ -314,25 +335,25 @@ const post_friends = async (req, res) => {
   if (!fremail) {
     res.redirect("/app?error= Server error. Subscribing failed.");
   }
-
-  res.render("search", { title: "Get Search", user: req.user });
-}; // end post subs
+}; // end post
 
 const draft_process = async (req, res) => {
-  
   let user = null;
-  let chk_db_artcl = null ;
-  // const chk_db_procssr =;
-
+  let chk_db_artcl = null;
+  //  ---- ------ proc a = get table row in proclogs  ------ 
+  //  IF HAS 1 [thats oldest + get content table accdg to id 
+  
   try {
-    const postingblog = await getDrafts().then((vl) => {
-      console.log("postingblog");
-      console.log("<== blogging");
-      res.redirect("/app?message=You have successfully posted a blog");
-    });
+      const postingblog = await getDrafts().then((vl) => {
+         // get variables
+         console.log("vl==================================="); 
+         console.log(vl); 
 
-    res.redirect("home");
+         
+         
+      });
 
+      res.redirect("home");
   } catch (error) {
     console.log("Error!!", error);
     res.redirect("/app?error=Server error");

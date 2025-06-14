@@ -5,6 +5,8 @@ const { Pool } = require("pg");
 //   host: process.env.DB_HOST,
 //   database: process.env.DB_NAME,
 //   password: process.env.DB_PASSWORD,
+
+
 //   port: process.env.DB_PORT,
 // });
 
@@ -173,7 +175,7 @@ const getUserSubsByEmail = async (email) => {
     const result = await pool.query(query, [email]);
 
     console.log("result.rows[0]");
-    console.log(result.rows);
+    console.log(result.rows.length);
     return result.rows;
   } catch (error) {
     console.log("error");
@@ -277,20 +279,24 @@ const getSearchedchannels = async (data) => {
 };
 
 const getDrafts = async () => {
-  
-  
-  const query = "SELECT * FROM nc_articles WHERE nc_draft ";
-  
+
+  const query = "select nc.*, pl.*  from  nc_processed_content nc , nc_process_logs pl  where pl.id in (select id from nc_process_logs where processor ='process-a') and pl.status = 'ongoing' and nc.plid in (select id from nc_process_logs where processor ='process-a') limit 1" ;
+ 
   try {
     const result = await pool.query(query);
 
-    return result.rows; 
+    console.log(" @get drafts SELECT * FROM nc_process_log' ");
+    console.log(result.rows);
+    
+    return result.rows;
+
   } catch (error) {
     console.log("error get drafts");
     console.log(error);
   }
 
 };
+
 const getSearchedfriends = async (data) => {
   const { searched } = data;
   let search = `'%"Name"%:%${searched}%'`;
