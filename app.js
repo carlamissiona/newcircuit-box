@@ -23,7 +23,7 @@ const app = express();
 // kluster ai api key
 const apiKey = "306f81b0-6ade-40cd-90be-ed5b1d8de539";
 
-async function fetch_klsai(paragraph_art) {
+async function fetch_klsai_setone(paragraph_art) {
 
   const response = await fetch("https://api.kluster.ai/v1/chat/completions", {
     method: "POST",
@@ -34,7 +34,7 @@ async function fetch_klsai(paragraph_art) {
     body: JSON.stringify({
       model: "klusterai/Meta-Llama-3.1-8B-Instruct-Turbo",
       messages: [
-        { role: "system", content: "Play a role of a machine-like system giving exact answers and not being conversational; also not being talkative with how you think. You are given a paragraph and you must take 3 and minimum of 2 sentences which you know is not a misinformation. You must also support this sentence with supporting detail info with 1-2 sentences. You are like a web misinformation machine you don't have to explain your logic. Output with this format: first you must Number the sentence from paragraph, then add supporting info under the numbering of the cited sentence. This is the format: 1. [Cited Sentence] \n    Supporting Info : [ Your training data ]\n    AI Model : [ Your LLM Model Name Remove kluster AI ]\n 2. [Cited Sentence] \n    Supporting Info : [ Your training data ]\n    AI Model : [ Your LLM Model Name Remove kluster AI ]\n 3. [Cited Sentence] \n    Supporting Info : [ Your training data ]" },
+        { role: "system", content: "Play a role of a machine-like system giving exact answers and not being conversational; also not being talkative with how you think. You are given a paragraph and you must take maximum 6 (sentence or term) and minimum of 2 sentences or term which you know (a term that you know or can define base on the paragraph context) or a sentence cited that you know is not a misinformation. You must also support this term/sentence with supporting  info with 1-2 sentences. You are like a web misinformation machine you don't have to explain your logic to be an explainable AI. Output with this format: first you must Number the term/sentence cited from the paragraph, then add supporting info under the numbering of the cited. This is the format: 1. [Cited Term/Sentence] \n Supporting Info : [ Your training data ] 2. [Cited Term/Sentence] \n Supporting Info : [ Your training data ] \n  ....etc." },
         { role: "user", content: paragraph_art }
       ]
     })
@@ -65,8 +65,8 @@ async function fetch_klsai(paragraph_art) {
             });
           }
 
-         console.log("result");
-         console.log(result);
+        //  console.log("result");
+        //  console.log(result);
          read();
          return result;
            
@@ -133,10 +133,14 @@ app.get("/drafts_db", async (req, res) => {
       let pargph = sentences.slice(0, 20);
       const art_prgph = pargph.join(". ");
       console.log("==============art_prgph");
-      // console.log(art_prgph);
+
      
-      let kl_llama = fetch_klsai(art_prgph).catch(console.error);
+      let kl_llma = fetch_klsai_setone(art_prgph).catch(console.error);
+
       console.log("returned meta llama +++++++++++++++++++");
+      console.log(kl_llma);
+
+      
       
     });
   } catch (error) {
