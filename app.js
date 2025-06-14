@@ -16,7 +16,7 @@ const { getDrafts } = require("./db");
 const app = express();
 
 
-//Kluster AI 
+//Start Kluster AI 
 
 
 
@@ -24,6 +24,7 @@ const app = express();
 const apiKey = "306f81b0-6ade-40cd-90be-ed5b1d8de539";
 
 async function fetch_klsai(paragraph_art) {
+
   const response = await fetch("https://api.kluster.ai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -33,30 +34,51 @@ async function fetch_klsai(paragraph_art) {
     body: JSON.stringify({
       model: "klusterai/Meta-Llama-3.1-8B-Instruct-Turbo",
       messages: [
-        { role: "system", content: "Play a role of a machine-like system giving exact answers and not being conversational; also not being talkative with how you think. You are given a paragraph and you must take 3 and minimum of 2 sentences which you know is not a misinformation. You must also support this sentence with supporting detail info with 1-2 sentences. You are like a web misinformation machine you don't have to explain your logic. Output with this format: first you must Number the sentence from paragraph (1-3). Cite this same sentence from paragraph. It must be only 1 sentence. Then under that numbering add a supporting info from your training; label it with text: Supporting Info. Finally attach your model name as a source of the supporting info, this is bec. you are a web misinformation system that validates paragraphs for better web literacy. " },
+        { role: "system", content: "Play a role of a machine-like system giving exact answers and not being conversational; also not being talkative with how you think. You are given a paragraph and you must take 3 and minimum of 2 sentences which you know is not a misinformation. You must also support this sentence with supporting detail info with 1-2 sentences. You are like a web misinformation machine you don't have to explain your logic. Output with this format: first you must Number the sentence from paragraph, then add supporting info under the numbering of the cited sentence. This is the format: 1. [Cited Sentence] \n    Supporting Info : [ Your training data ]\n    AI Model : [ Your LLM Model Name Remove kluster AI ]\n 2. [Cited Sentence] \n    Supporting Info : [ Your training data ]\n    AI Model : [ Your LLM Model Name Remove kluster AI ]\n 3. [Cited Sentence] \n    Supporting Info : [ Your training data ]" },
         { role: "user", content: paragraph_art }
       ]
     })
-  }).then((fetch_value) => {
+  }).then(async (fetch_value) => {
         
         if (!fetch_value.ok) {
           const error = await fetch_value.text();
           throw new Error(`API error: ${error}`);
 
-        } else{
+        } else {
+          let res = await fetch_value.body;
+         
 
-          console.log("fetch_value>>>>>>>>>>>>>>>>>");
-          console.log(fetch_value);
-          // console.log("Response:", data.choices[0].message);
+          const reader = fetch_value.body.getReader();
+          const decoder = new TextDecoder();
+          let result = "";
+        
+          function read() {
+            return reader.read().then(({ done, value }) => {
+              if (done) {
+                console.log("Stream complete:", result);
+                return result; // full response text
+              }
+              result += decoder.decode(value, { stream: true });
+              // Optionally, process partial data here
+              read();
 
+            });
+          }
+
+         console.log("result");
+         console.log(result);
+         read();
+         return result;
+           
         }
 
   });
 
 }
 
-fetch_klsai().catch(console.error);
 
+
+//Kluster AI 
 
 
 
@@ -111,10 +133,10 @@ app.get("/drafts_db", async (req, res) => {
       let pargph = sentences.slice(0, 20);
       const art_prgph = pargph.join(". ");
       console.log("==============art_prgph");
-      console.log(art_prgph);
+      // console.log(art_prgph);
      
-      fetch_klsai(art_prgph);
-      
+      let kl_llama = fetch_klsai(art_prgph).catch(console.error);
+      console.log("returned meta llama +++++++++++++++++++");
       
     });
   } catch (error) {

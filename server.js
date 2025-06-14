@@ -1,12 +1,12 @@
 const app = require("./app");
 
-const PORT = process.env.PORT || 3021;
+const PORT = process.env.PORT || 3022;
 
 async function fetch_a() {
   try {
     console.log("after 2 min hiiiiiiii");
 
-    const response = await fetch("https://29csrv-3021.csb.app/drafts_db");
+    const response = await fetch("https://29csrv-3022.csb.app/drafts_db");
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -37,8 +37,8 @@ async function fetch_b() {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log("======app=====");
+  console.log("+++++++++app++++++++");
 
-  setInterval(fetch_a, 120000); // Calls greet() every 1000 milliseconds (1 second)
+  setInterval(fetch_a, 50000); // Calls greet() every 1000 milliseconds (1 second)
   setInterval(fetch_b, 200000); // Calls greet() every 1000 milliseconds (1 second)
 });
