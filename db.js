@@ -277,9 +277,56 @@ const getSearchedchannels = async (data) => {
   }
 };
 
+
+
+const update_prev_content = async (data) => {
+  
+      const { content, plid, model, prev } = data;
+      let model_occur = "New Circuit Model : "+model;
+  
+      if(prev.split(model_occur).length > 0  ){
+          return null; 
+      }
+
+      /**  db insert but */
+      let newcontent = "\n\nNew Circuit Model : "+ model+"\n------------------\n"; ;
+      newcontent = newcontent + content;
+      newcontent = prev + newcontent;
+      console.log("------------------new line content--------------------------------");
+      console.log("------------------new line content--------------------------------");
+      console.log(newcontent);
+      console.log("+++++++++-newcontent++++++++++++++");
+      console.log(newcontent);
+      const query = `UPDATE nc_processed_content
+        SET results = $1 WHERE plid = $2
+        RETURNING *
+    `;
+    
+
+      try {
+        const result = await pool.query(query, [newcontent, plid ]);
+        // console.log("DB results push drafts");
+        // console.log("DB results push drafts");
+        console.log("++++++++++++DB results push drafts+++++++++++++++++++");
+        console.log("++++++++++++DB results push drafts+++++++++++++++++++");
+        console.log("++++++++++++DB results push drafts+++++++++++++++++++");
+        console.log(result);
+
+        return result.rows[0];
+      } catch (error) {
+        console.log("error");
+        console.log(error);
+        console.log(`Error creating user: ${error.message}`);
+        return null;
+      }
+
+};
+
+
 const getDrafts = async () => {
-  const query =
-    "select nc.*, pl.*  from  nc_processed_content nc , nc_process_logs pl  where pl.id in (select id from nc_process_logs where processor ='process-a') and pl.status = 'ongoing' and nc.plid in (select id from nc_process_logs where processor ='process-a') limit 1";
+  const query = " select nc.*, pl.*  from  nc_processed_content nc , nc_process_logs pl  where pl.id in (select id from nc_process_logs where processor ='process-a') and pl.status = 'DRAFT_START' and nc.plid in (select id from nc_process_logs where processor ='process-a') limit 1";
+    
+    //select nc.*, pl.*  from  nc_processed_content nc , nc_process_logs pl  where pl.id in (select id from nc_process_logs where processor ='process-a') and pl.status = 'DRAFT_START' and nc.plid in (select id from nc_process_logs where processor ='process-a') limit 1";
 
   try {
     const result = await pool.query(query);
@@ -295,30 +342,66 @@ const getDrafts = async () => {
 };
 
 const pushDraftsinfo = async (data) => {
-  const { content, plid, model } = data;
-  /**  db insert but */
 
-  const query = `
-   INSERT INTO nc_users (nc_details_user, nc_email,  nc_password, created_at) 
-   VALUES ($1, $2, $3, NOW())
-   RETURNING id,  created_at
- `;
+    const { content, plid, model } = data;
+    /**Get the row s prev value first */
+    const query_prev = " select *  from  nc_processed_content where plid = $1  ";        
+    //select nc.*, pl.*  from  nc_processed_content nc , nc_process_logs pl  where pl.id in (select id from nc_process_logs where processor ='process-a') and pl.status = 'DRAFT_START' and nc.plid in (select id from nc_process_logs where processor ='process-a') limit 1";
+    let prev = null; let  length_llm = 0;
+    try {
 
-  const details = `Name: ${name}, Role: ${role} `;
-  const values = [details, email, hpassword];
+      const prev_content = await pool.query(query_prev, [plid]);
 
-  try {
-    const result = await pool.query(query, values);
-    console.log("DB results ");
-    console.log(result);
+      console.log(" @get drafts SELECT * FROM nc_process_content  pushDraftsinfo' ");
+      console.log(prev_content.rows);
 
-    return result.rows[0];
-  } catch (error) {
-    console.log("error");
-    console.log(error);
-    throw new Error(`Error creating user: ${error.message}`);
-  }
+      prev = prev_content.rows[0].results ;
+    } catch (error) {
+      console.log("error get drafts");
+      console.log(error);
+      // return something and abort 
+    }
+
+    if( prev == null){
+        console.log("+++++++prev+++++++++++++++++++++");
+        console.log("+++++++prev+++++++++++++++++++++");
+        console.log("prev");
+        console.log(prev); 
+        prev = "";
+    }else {
+      length_llm = prev.split("------------------").length;
+      console.log("--------------------------length llm ----------------------------"); 
+      console.log("--------------------------length llm ----------------------------"); 
+      console.log(model);
+      console.log(length_llm);
+      console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>");
+      console.log(prev.split("------------------")[0]);
+      console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>");
+
+
+      console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>");
+      console.log(prev.split("------------------")[1]);
+       console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>");
+    }
+    if((length_llm - 1) < 3){
+      // update and add content 
+       let newupdate = update_prev_content({ prev, content, plid, model });
+       if( newupdate.length > 0 ){
+          return true;
+       }else{
+          return "Error in updating processor";
+       }
+
+    }else {
+       // close the batch work 
+       return "Error in updating processor";
+
+    }
+ 
+
 };
+
+
 const getSearchedfriends = async (data) => {
   const { searched } = data;
   let search = `'%"Name"%:%${searched}%'`;
