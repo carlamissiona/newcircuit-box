@@ -67,8 +67,13 @@ async function fetch_kly1(idarticle, paragraph_art, modelname) {
                 model: modelname,
                 content: JSON.parse(result).choices[0].message.content,
               };
+              console.log(data);
+              const posting = await pushDraftsinfo(data).then(async (vl) => {
 
-              const posting = await pushDraftsinfo(data).then(async (vl) => {});
+                console.log("pushDraftsinfo vl");
+                console.log(vl);
+
+              });
               return result; // full response text
             }
 
@@ -81,7 +86,7 @@ async function fetch_kly1(idarticle, paragraph_art, modelname) {
         let r = await read().then((response) => {
           console.log("response await reader");
           console.log(response);
-          return response;
+          return true;
         });
       }
     })
@@ -284,15 +289,12 @@ app.get("/drafts_db", async (req, res) => {
 
       console.log("==============art_prgph");
 
-      let kl_llma = await fetch_kly1(
-        plid,
-        art_prgph_1,
-        "klusterai/Meta-Llama-3.1-8B-Instruct-Turbo"
-      )
-        .then((v) => {
+      let kl_llma = await fetch_kly1(  plid,  art_prgph_1, "klusterai/Meta-Llama-3.1-8B-Instruct-Turbo"
+      ).then((v) => {
           console.log(v);
-        })
-        .catch(console.error);
+      }).catch(console.error);
+
+      
       let kl_mist = await fetch_kly1(
         plid,
         art_prgph_2,
@@ -303,7 +305,7 @@ app.get("/drafts_db", async (req, res) => {
         })
         .catch(console.error);
 
-      let kl_dsek = await fetch_kly1(plid, art_prgph_3, "google/gemma-3-27b-it")
+      let kl_dsek = await fetch_kly1(plid, art_prgph_3, "mistralai/Mistral-Small-24B-Instruct-2501")
         .then((v) => {
           console.log(v);
         })
