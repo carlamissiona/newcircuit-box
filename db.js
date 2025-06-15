@@ -6,7 +6,6 @@ const { Pool } = require("pg");
 //   database: process.env.DB_NAME,
 //   password: process.env.DB_PASSWORD,
 
-
 //   port: process.env.DB_PORT,
 // });
 
@@ -279,24 +278,47 @@ const getSearchedchannels = async (data) => {
 };
 
 const getDrafts = async () => {
+  const query =
+    "select nc.*, pl.*  from  nc_processed_content nc , nc_process_logs pl  where pl.id in (select id from nc_process_logs where processor ='process-a') and pl.status = 'ongoing' and nc.plid in (select id from nc_process_logs where processor ='process-a') limit 1";
 
-  const query = "select nc.*, pl.*  from  nc_processed_content nc , nc_process_logs pl  where pl.id in (select id from nc_process_logs where processor ='process-a') and pl.status = 'ongoing' and nc.plid in (select id from nc_process_logs where processor ='process-a') limit 1" ;
- 
   try {
     const result = await pool.query(query);
 
     console.log(" @get drafts SELECT * FROM nc_process_log' ");
     console.log(result.rows);
-    
-    return result.rows;
 
+    return result.rows;
   } catch (error) {
     console.log("error get drafts");
     console.log(error);
   }
-
 };
 
+const pushDraftsinfo = async (data) => {
+  const { content, plid, model } = data;
+  /**  db insert but */
+
+  const query = `
+   INSERT INTO nc_users (nc_details_user, nc_email,  nc_password, created_at) 
+   VALUES ($1, $2, $3, NOW())
+   RETURNING id,  created_at
+ `;
+
+  const details = `Name: ${name}, Role: ${role} `;
+  const values = [details, email, hpassword];
+
+  try {
+    const result = await pool.query(query, values);
+    console.log("DB results ");
+    console.log(result);
+
+    return result.rows[0];
+  } catch (error) {
+    console.log("error");
+    console.log(error);
+    throw new Error(`Error creating user: ${error.message}`);
+  }
+};
 const getSearchedfriends = async (data) => {
   const { searched } = data;
   let search = `'%"Name"%:%${searched}%'`;
@@ -331,4 +353,5 @@ module.exports = {
   getSearchedfriends,
   postArticle,
   getDrafts,
+  pushDraftsinfo,
 };

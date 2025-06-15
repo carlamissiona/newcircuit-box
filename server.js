@@ -1,17 +1,16 @@
 const app = require("./app");
 
-const PORT = process.env.PORT || 3022;
+const PORT = process.env.PORT || 3026;
 
 async function fetch_a() {
   try {
     console.log("after 2 min hiiiiiiii");
 
-    const response = await fetch("https://29csrv-3022.csb.app/drafts_db");
+    const response = await fetch("https://29csrv-3026.csb.app/drafts_db");
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    console.log(data);
   } catch (error) {
     console.error(error);
     console.error("Fetch error:", error.message);
@@ -39,6 +38,6 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log("+++++++++app++++++++");
 
-  setInterval(fetch_a, 50000); // Calls greet() every 1000 milliseconds (1 second)
+  // setInterval(fetch_a, 15000); // Calls greet() every 1000 milliseconds (1 second)
   setInterval(fetch_b, 200000); // Calls greet() every 1000 milliseconds (1 second)
 });
